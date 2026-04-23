@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # NEXA - Plataforma de Estudos
 
 MVP de uma plataforma de estudos para escolas públicas, desenvolvida com foco em simplicidade, organização e mobile-first.
@@ -40,17 +41,106 @@ nexa/
 ## 🚀 Como Começar
 
 ### Instalação
+=======
+# 📚 Plataforma de Estudos para Escolas Públicas
+
+Aplicação web desenvolvida para apoiar o aprendizado de alunos da rede pública, oferecendo trilhas de estudo, exercícios e acompanhamento de desempenho em um ambiente acessível e intuitivo.
+
+---
+
+## 🚀 Objetivo
+
+Criar uma plataforma simples, acessível e eficiente que permita:
+
+* Alunos estudarem de forma estruturada
+* Professores acompanharem o progresso
+* Escolas terem visibilidade do desempenho geral
+
+---
+
+## 🧠 Funcionalidades (MVP)
+
+### 👨‍🎓 Aluno
+
+* Login/autenticação
+* Acesso a trilhas de estudo
+* Resolução de exercícios
+* Visualização de progresso
+
+### 🏫 Escola / Professor
+
+* Dashboard com lista de alunos
+* Acompanhamento de desempenho
+* Visualização de progresso por aluno
+
+---
+
+## 🏗️ Tecnologias
+
+* Frontend + Backend: Next.js
+* Banco de dados: PostgreSQL
+* Autenticação e backend auxiliar: Supabase
+* Deploy: Vercel
+* Versionamento: Git + GitHub
+
+---
+
+## 📁 Estrutura do Projeto
+
+```bash
+/app            # Rotas e páginas da aplicação
+/components     # Componentes reutilizáveis (UI)
+/services       # Regras de negócio e chamadas de API
+/lib            # Configurações (auth, db, etc.)
+/styles         # Estilos globais
+/public         # Arquivos estáticos
+```
+
+---
+
+## ⚙️ Como rodar o projeto
+
+### 1. Clone o repositório
+
+```bash
+git clone https://github.com/seu-usuario/plataforma-estudos.git
+```
+
+### 2. Acesse a pasta
+
+```bash
+cd plataforma-estudos
+```
+
+### 3. Instale as dependências
+>>>>>>> 0df44c8c1cbb449e05971e5020f96178a0a02b5c
 
 ```bash
 npm install
 ```
 
+<<<<<<< HEAD
 ### Desenvolvimento
+=======
+### 4. Configure as variáveis de ambiente
+
+Crie um arquivo `.env` baseado no `.env.example`:
+
+```env
+DATABASE_URL=
+NEXT_PUBLIC_API_URL=
+SUPABASE_URL=
+SUPABASE_KEY=
+```
+
+### 5. Execute o projeto
+>>>>>>> 0df44c8c1cbb449e05971e5020f96178a0a02b5c
 
 ```bash
 npm run dev
 ```
 
+<<<<<<< HEAD
 Acesse [http://localhost:3000](http://localhost:3000) no seu navegador.
 
 ### Build para Produção
@@ -126,3 +216,87 @@ Este projeto é desenvolvido para fins educacionais.
 ---
 
 **Desenvolvido com ❤️ para educação pública**
+=======
+A aplicação estará disponível em:
+
+```
+http://localhost:3000
+```
+
+---
+
+## 🌿 Fluxo de Git
+
+Branches principais:
+
+* `main` → produção
+* `dev` → desenvolvimento
+
+Padrão de branches:
+
+```
+feature/nome-da-feature
+```
+
+Exemplo:
+
+```
+feature/login
+feature/exercicios
+```
+
+---
+
+## 🧾 Padrão de Commits
+
+```
+feat: nova funcionalidade
+fix: correção de bug
+refactor: melhoria de código
+```
+
+---
+
+## 👥 Organização da Equipe
+
+Sugestão inicial:
+
+* Dev 1 → Autenticação + banco de dados
+* Dev 2 → Interface do aluno
+* Dev 3 → Dashboard da escola
+
+---
+
+## 📌 Roadmap (MVP)
+
+* [ ] Autenticação
+* [ ] Cadastro de alunos
+* [ ] Trilhas de estudo
+* [ ] Exercícios
+* [ ] Sistema de progresso
+* [ ] Dashboard escolar
+
+---
+
+## ⚠️ Boas práticas
+
+* Não commitar diretamente na `main`
+* Sempre atualizar a branch `dev` antes de começar
+* Criar PRs pequenos e frequentes
+* Não subir arquivos `.env`
+
+---
+
+## 💡 Visão futura
+
+* Transformar em aplicativo mobile
+* Implementar funcionamento offline (PWA)
+* Sistema de recomendações personalizadas
+* Gamificação do aprendizado
+
+---
+
+## 📄 Licença
+
+Este projeto está em fase de desenvolvimento e ainda não possui uma licença definida.
+>>>>>>> 0df44c8c1cbb449e05971e5020f96178a0a02b5c
