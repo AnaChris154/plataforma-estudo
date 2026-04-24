@@ -1,11 +1,14 @@
 import { supabase } from '@/lib/supabaseClient';
-import { createProfile } from './profileService';
 import { getSchoolByCode } from './schoolService';
 
 export interface AuthUser {
   id: string;
   email: string;
-  user_metadata?: Record<string, any>;
+  user_metadata?: {
+    tipo?: 'aluno' | 'professor';
+    school_id?: string;
+    [key: string]: unknown;
+  };
 }
 
 interface AuthResponse {
@@ -55,12 +58,17 @@ export async function signIn(
  * @param email Email do usuário
  * @param password Senha
  * @param tipo 'aluno' ou 'professor'
+ * @param schoolCode Código da escola
+ * @param fullName Nome completo do usuário
+ * @param phone Número de telefone do usuário
  */
 export async function signUp(
   email: string,
   password: string,
   tipo: 'aluno' | 'professor' = 'aluno',
-  schoolCode: string
+  schoolCode: string,
+  fullName?: string,
+  phone?: string
 ): Promise<AuthResponse> {
   try {
     // Validar tipo
@@ -73,6 +81,7 @@ export async function signUp(
       return { user: null, error: new Error('Código da escola é obrigatório') };
     }
 
+    // Buscar escola
     const { school, error: schoolError } = await getSchoolByCode(schoolCode);
 
     if (schoolError) {
@@ -83,11 +92,18 @@ export async function signUp(
       return { user: null, error: new Error('Código da escola inválido') };
     }
 
+    // ✅ Criar conta COM METADADOS (tipo, school_id, display_name e phone armazenados no auth.users)
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/login`,
+        data: {
+          tipo,
+          school_id: school.id,
+          display_name: fullName || email.split('@')[0], // Fallback para parte do email
+          phone: phone || null,
+        },
       },
     });
 
@@ -100,19 +116,12 @@ export async function signUp(
       return { user: null, error: new Error('Erro ao criar conta') };
     }
 
-    // ✅ Criar perfil automaticamente após criar user
-    const { profile, error: profileError } = await createProfile(
-      data.user.id,
-      email,
+    console.log('✅ Conta criada com metadados:', {
       tipo,
-      school.id
-    );
-
-    if (profileError) {
-      console.error('Erro ao criar perfil:', profileError.message);
-      // Não retornar erro aqui, pois usuário foi criado no Auth
-      // Profile pode ser criado depois se necessário
-    }
+      school_id: school.id,
+      display_name: fullName || email.split('@')[0],
+      phone: phone || null,
+    });
 
     return {
       user: {

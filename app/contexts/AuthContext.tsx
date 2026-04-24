@@ -30,48 +30,81 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Verificar usuário atual ao montar
     const checkUser = async () => {
-      const currentUser = await getCurrentUser();
-      setUser(currentUser);
+      try {
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
 
-      // Se tem usuário, carregar seu perfil
-      if (currentUser) {
-        const { profile: userProfile } = await getProfile(currentUser.id);
-        setProfile(userProfile);
+        // Se tem usuário, carregar seu perfil e escola
+        if (currentUser) {
+          // ✅ getProfile() agora lê de metadata, não precisa query ao banco
+          const { profile: userProfile, error: profileError } = await getProfile();
 
-        if (userProfile?.school_id) {
-          const { school: userSchool } = await getSchoolById(userProfile.school_id);
-          setSchool(userSchool);
+          if (profileError) {
+            console.warn('⚠️ Erro ao carregar perfil:', profileError.message);
+            setProfile(null);
+          } else if (userProfile) {
+            setProfile(userProfile);
+
+            // Se tem school_id, carregar dados da escola
+            if (userProfile?.school_id) {
+              const { school: userSchool } = await getSchoolById(userProfile.school_id);
+              setSchool(userSchool);
+            } else {
+              setSchool(null);
+            }
+          }
         } else {
+          setProfile(null);
           setSchool(null);
         }
+      } catch (err) {
+        console.error('❌ Erro crítico no checkUser:', err);
+        setProfile(null);
+        setSchool(null);
+      } finally {
+        // ✅ SEMPRE desabilitar loading, mesmo com erro
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     checkUser();
 
     // Escutar mudanças de autenticação
     const subscription = onAuthStateChange(async (authUser) => {
-      setUser(authUser);
+      try {
+        setUser(authUser);
 
-      // Se tem usuário, carregar seu perfil
-      if (authUser) {
-        const { profile: userProfile } = await getProfile(authUser.id);
-        setProfile(userProfile);
+        // Se tem usuário, carregar seu perfil e escola
+        if (authUser) {
+          // ✅ getProfile() agora lê de metadata
+          const { profile: userProfile, error: profileError } = await getProfile();
 
-        if (userProfile?.school_id) {
-          const { school: userSchool } = await getSchoolById(userProfile.school_id);
-          setSchool(userSchool);
+          if (profileError) {
+            console.warn('⚠️ Erro ao carregar perfil:', profileError.message);
+            setProfile(null);
+          } else if (userProfile) {
+            setProfile(userProfile);
+
+            // Se tem school_id, carregar dados da escola
+            if (userProfile?.school_id) {
+              const { school: userSchool } = await getSchoolById(userProfile.school_id);
+              setSchool(userSchool);
+            } else {
+              setSchool(null);
+            }
+          }
         } else {
+          setProfile(null);
           setSchool(null);
         }
-      } else {
+      } catch (err) {
+        console.error('❌ Erro no onAuthStateChange:', err);
         setProfile(null);
         setSchool(null);
+      } finally {
+        // ✅ SEMPRE desabilitar loading, mesmo com erro
+        setLoading(false);
       }
-
-      setLoading(false);
     });
 
     return () => {
