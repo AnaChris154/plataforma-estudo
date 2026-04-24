@@ -3,16 +3,68 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import {
+  Settings,
+  User,
+  ClipboardCheck,
+  Target,
+  GraduationCap,
+  Briefcase,
+  BookOpen,
+  Clock,
+  RotateCcw,
+  ArrowRight,
+  LayoutDashboard,
+  Lightbulb,
+} from 'lucide-react';
 import { Navigation } from '@/components/Navigation';
 import { Header } from '@/components/Header';
 import { Container } from '@/components/Container';
 import { Button } from '@/components/Button';
+import { Card } from '@/components/Card';
+import { Avatar } from '@/components/Avatar';
+import { Badge } from '@/components/Badge';
+import { Skeleton } from '@/components/Skeleton';
 import { PageContainer } from '@/components/PageContainer';
 import { ProtectedRoute } from '@/app/contexts/ProtectedRoute';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { getStudentGoal, resetarDiagnostico } from '@/services/studentGoalsService';
 import type { StudentGoal } from '@/services/studentGoalsService';
-import { ClipboardCheck, Target, RotateCcw, ArrowRight, LayoutDashboard, Zap, BookOpen, Clock, GraduationCap, Briefcase, User } from 'lucide-react';
+
+const statusConfig = {
+  not_started: {
+    icon: Clock,
+    label: 'Nao Iniciado',
+    desc: 'Voce ainda nao iniciou o diagnostico',
+    variant: 'warning' as const,
+  },
+  skipped: {
+    icon: ClipboardCheck,
+    label: 'Pulado',
+    desc: 'Voce pulou o diagnostico inicial',
+    variant: 'warning' as const,
+  },
+  completed: {
+    icon: ClipboardCheck,
+    label: 'Concluido',
+    desc: 'Seu diagnostico foi realizado com sucesso',
+    variant: 'success' as const,
+  },
+};
+
+const goalIcons = {
+  faculdade: GraduationCap,
+  mercado: Briefcase,
+  escola: BookOpen,
+};
+
+const tips = [
+  'Revise seu objetivo periodicamente',
+  'Refaca o diagnostico quando sentir que progrediu',
+  'Acompanhe suas disciplinas regularmente',
+  'Use as trilhas de estudo como guia estruturado',
+];
 
 function ConfiguracoesContent() {
   const router = useRouter();
@@ -43,129 +95,145 @@ function ConfiguracoesContent() {
     setResetting(true);
     setError(null);
 
-    const { success, error: resetError } = await resetarDiagnostico(user.id);
+    const { error: resetError } = await resetarDiagnostico(user.id);
 
     if (resetError) {
-      setError(`Erro ao resetar diagnóstico: ${resetError.message}`);
+      setError(`Erro ao resetar diagnostico: ${resetError.message}`);
       setResetting(false);
       return;
     }
 
-    // Redirecionar para diagnóstico
     router.push('/aluno/diagnostico');
   };
 
   const diagnosticoStatus = goal?.diagnostico_status || 'not_started';
-
-  const statusConfig = {
-    not_started: {
-      icon: <Clock className="w-6 h-6" />,
-      label: 'Não Iniciado',
-      desc: 'Você ainda não iniciou o diagnóstico',
-      color: 'text-amber-600',
-      bg: 'bg-amber-50 border-amber-200',
-    },
-    skipped: {
-      icon: <ClipboardCheck className="w-6 h-6" />,
-      label: 'Pulado',
-      desc: 'Você pulou o diagnóstico inicial',
-      color: 'text-orange-600',
-      bg: 'bg-orange-50 border-orange-200',
-    },
-    completed: {
-      icon: <ClipboardCheck className="w-6 h-6" />,
-      label: 'Concluído',
-      desc: 'Seu diagnóstico foi realizado com sucesso',
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50 border-emerald-200',
-    },
-  };
-
   const status = statusConfig[diagnosticoStatus as keyof typeof statusConfig] || statusConfig.not_started;
+  const userName = profile?.display_name || user?.email?.split('@')[0] || 'Usuario';
 
   return (
     <PageContainer>
       <Navigation />
       <Header
-        title="Configurações"
-        description="Suas preferências e informações de perfil"
+        title="Configuracoes"
+        description="Suas preferencias e informacoes de perfil"
       />
 
-      <Container className="py-8 md:py-12">
+      <Container className="py-8">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-hero flex items-center justify-center animate-bounce-gentle shadow-glow">
-              <Zap className="w-8 h-8 text-white" />
-            </div>
-            <div className="flex gap-1">
-              <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:0ms]" />
-              <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:150ms]" />
-              <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:300ms]" />
-            </div>
-            <p className="text-muted text-sm">Carregando configurações...</p>
+          <div className="space-y-4 max-w-2xl">
+            <Skeleton height={120} />
+            <Skeleton height={100} />
+            <Skeleton height={150} />
           </div>
         ) : (
-          <div className="space-y-8 max-w-2xl">
-
+          <div className="space-y-6 max-w-2xl">
             {/* Profile Banner */}
-            <div className="rounded-2xl bg-gradient-hero p-6 shadow-glow text-white relative overflow-hidden">
-              <div className="absolute -top-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-xl" />
-              <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/10 rounded-full blur-xl" />
-              <div className="relative flex items-center gap-5">
-                <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center shadow-lg flex-shrink-0">
-                  <User className="w-8 h-8 text-white" />
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Card
+                variant="elevated"
+                padding="lg"
+                className="bg-[hsl(var(--primary))] border-0"
+              >
+                <div className="flex items-center gap-5">
+                  <Avatar name={userName} size="xl" className="bg-white/20 text-white" />
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-xl font-bold text-white truncate">
+                      {userName}
+                    </h2>
+                    <p className="text-white/80 text-sm truncate">
+                      {user?.email}
+                    </p>
+                    {profile?.phone && (
+                      <p className="text-white/70 text-xs mt-0.5">
+                        {profile.phone}
+                      </p>
+                    )}
+                    <Badge
+                      variant="default"
+                      className="mt-2 bg-white/20 text-white border-0"
+                    >
+                      {profile?.tipo === 'aluno' ? 'Aluno' : 'Professor'}
+                    </Badge>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <h2 className="text-xl font-bold truncate">
-                    {profile?.display_name || user?.email?.split('@')[0] || 'Usuário'}
-                  </h2>
-                  <p className="text-white/80 text-sm truncate">{user?.email}</p>
-                  {profile?.phone && (
-                    <p className="text-white/70 text-xs mt-0.5">{profile.phone}</p>
-                  )}
-                  <span className="inline-block mt-2 px-3 py-1 bg-white/20 backdrop-blur rounded-full text-xs font-semibold">
-                    {profile?.tipo === 'aluno' ? 'Aluno' : 'Professor'}
-                  </span>
-                </div>
-              </div>
-            </div>
+              </Card>
+            </motion.div>
 
             {/* Diagnostic Status */}
-            <div>
-              <p className="text-xs font-bold text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <h3 className="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider mb-3 flex items-center gap-2">
                 <ClipboardCheck className="w-4 h-4" />
-                Diagnóstico de Conhecimento
-              </p>
+                Diagnostico de Conhecimento
+              </h3>
 
-              <div className={`rounded-2xl border-2 p-5 ${status.bg}`}>
+              <Card
+                className={
+                  status.variant === 'success'
+                    ? 'bg-[hsl(var(--success-soft))] border-[hsl(var(--success)_/_0.2)]'
+                    : 'bg-[hsl(var(--warning-soft))] border-[hsl(var(--warning)_/_0.2)]'
+                }
+              >
                 <div className="flex items-start gap-4 mb-4">
-                  <div className={`w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm flex-shrink-0 ${status.color}`}>
-                    {status.icon}
+                  <div
+                    className={[
+                      'w-10 h-10 rounded-xl flex items-center justify-center shrink-0',
+                      status.variant === 'success'
+                        ? 'bg-[hsl(var(--success))]'
+                        : 'bg-[hsl(var(--warning))]',
+                    ].join(' ')}
+                  >
+                    <status.icon className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className={`font-bold ${status.color}`}>{status.label}</p>
-                    <p className="text-sm text-muted mt-0.5">{status.desc}</p>
+                    <p
+                      className={[
+                        'font-semibold',
+                        status.variant === 'success'
+                          ? 'text-[hsl(var(--success))]'
+                          : 'text-[hsl(38_92%_40%)]',
+                      ].join(' ')}
+                    >
+                      {status.label}
+                    </p>
+                    <p className="text-sm text-[hsl(var(--muted-foreground))] mt-0.5">
+                      {status.desc}
+                    </p>
                   </div>
                 </div>
 
                 {error && (
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4 text-red-700 text-sm">
-                    {error}
-                  </div>
+                  <Card className="bg-[hsl(var(--destructive-soft))] border-[hsl(var(--destructive))] mb-4">
+                    <p className="text-sm text-[hsl(var(--destructive))]">{error}</p>
+                  </Card>
                 )}
 
                 {diagnosticoStatus === 'not_started' && (
                   <Link href="/aluno/diagnostico">
-                    <Button fullWidth size="lg" icon={<ArrowRight className="w-4 h-4" />}>
-                      Iniciar Diagnóstico
+                    <Button
+                      fullWidth
+                      size="lg"
+                      iconRight={<ArrowRight className="w-4 h-4" />}
+                    >
+                      Iniciar Diagnostico
                     </Button>
                   </Link>
                 )}
 
                 {diagnosticoStatus === 'skipped' && (
                   <Link href="/aluno/diagnostico">
-                    <Button fullWidth size="lg" icon={<ArrowRight className="w-4 h-4" />}>
-                      Fazer Diagnóstico Agora
+                    <Button
+                      fullWidth
+                      size="lg"
+                      iconRight={<ArrowRight className="w-4 h-4" />}
+                    >
+                      Fazer Diagnostico Agora
                     </Button>
                   </Link>
                 )}
@@ -176,121 +244,167 @@ function ConfiguracoesContent() {
                     size="lg"
                     variant="outline"
                     onClick={handleResetDiagnostico}
-                    disabled={resetting}
-                    icon={<RotateCcw className={`w-4 h-4 ${resetting ? 'animate-spin' : ''}`} />}
+                    isLoading={resetting}
+                    icon={<RotateCcw className="w-4 h-4" />}
                   >
-                    {resetting ? 'Refazendo...' : 'Refazer Diagnóstico'}
+                    {resetting ? 'Refazendo...' : 'Refazer Diagnostico'}
                   </Button>
                 )}
-              </div>
-            </div>
+              </Card>
+            </motion.div>
 
             {/* Goal Info */}
             {goal && (
-              <div>
-                <p className="text-xs font-bold text-muted uppercase tracking-wider mb-3 flex items-center gap-2">
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <h3 className="text-xs font-semibold text-[hsl(var(--muted-foreground))] uppercase tracking-wider mb-3 flex items-center gap-2">
                   <Target className="w-4 h-4" />
                   Seu Objetivo
-                </p>
+                </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="rounded-2xl border-2 border-violet-100 bg-violet-50 p-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center flex-shrink-0">
-                      {goal.objetivo === 'faculdade' ? (
-                        <GraduationCap className="w-5 h-5 text-violet-600" />
-                      ) : goal.objetivo === 'mercado' ? (
-                        <Briefcase className="w-5 h-5 text-violet-600" />
-                      ) : (
-                        <BookOpen className="w-5 h-5 text-violet-600" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-xs text-violet-600 font-semibold">Objetivo</p>
-                      <p className="font-bold text-gray-900 capitalize text-sm">
-                        {goal.objetivo === 'faculdade' ? 'Faculdade' : goal.objetivo === 'mercado' ? 'Mercado' : 'Escola'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {goal.forma_ingresso && (
-                    <div className="rounded-2xl border-2 border-sky-100 bg-sky-50 p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center flex-shrink-0">
-                        <Target className="w-5 h-5 text-sky-600" />
+                  <Card className="bg-[hsl(var(--primary-soft))] border-[hsl(var(--primary)_/_0.2)]">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-[hsl(var(--primary))] flex items-center justify-center shrink-0">
+                        {goal.objetivo === 'faculdade' ? (
+                          <GraduationCap className="w-5 h-5 text-white" />
+                        ) : goal.objetivo === 'mercado' ? (
+                          <Briefcase className="w-5 h-5 text-white" />
+                        ) : (
+                          <BookOpen className="w-5 h-5 text-white" />
+                        )}
                       </div>
                       <div>
-                        <p className="text-xs text-sky-600 font-semibold">Caminho</p>
-                        <p className="font-bold text-gray-900 text-sm capitalize">{goal.forma_ingresso.replace(/_/g, ' ')}</p>
+                        <p className="text-xs text-[hsl(var(--primary))] font-medium">
+                          Objetivo
+                        </p>
+                        <p className="font-semibold text-[hsl(var(--foreground))] capitalize text-sm">
+                          {goal.objetivo === 'faculdade'
+                            ? 'Faculdade'
+                            : goal.objetivo === 'mercado'
+                            ? 'Mercado'
+                            : 'Escola'}
+                        </p>
                       </div>
                     </div>
+                  </Card>
+
+                  {goal.forma_ingresso && (
+                    <Card className="bg-[hsl(var(--accent-soft))] border-[hsl(var(--accent)_/_0.2)]">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-[hsl(var(--accent))] flex items-center justify-center shrink-0">
+                          <Target className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-[hsl(var(--accent))] font-medium">
+                            Caminho
+                          </p>
+                          <p className="font-semibold text-[hsl(var(--foreground))] text-sm capitalize">
+                            {goal.forma_ingresso.replace(/_/g, ' ')}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
                   )}
 
                   {goal.curso_desejado && (
-                    <div className="rounded-2xl border-2 border-emerald-100 bg-emerald-50 p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                        <BookOpen className="w-5 h-5 text-emerald-600" />
+                    <Card className="bg-[hsl(var(--success-soft))] border-[hsl(var(--success)_/_0.2)]">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-[hsl(var(--success))] flex items-center justify-center shrink-0">
+                          <BookOpen className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-[hsl(var(--success))] font-medium">
+                            Curso Desejado
+                          </p>
+                          <p className="font-semibold text-[hsl(var(--foreground))] text-sm">
+                            {goal.curso_desejado}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs text-emerald-600 font-semibold">Curso Desejado</p>
-                        <p className="font-bold text-gray-900 text-sm">{goal.curso_desejado}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {goal.universidade && (
-                    <div className="rounded-2xl border-2 border-indigo-100 bg-indigo-50 p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                        <GraduationCap className="w-5 h-5 text-indigo-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-indigo-600 font-semibold">Universidade</p>
-                        <p className="font-bold text-gray-900 text-sm">{goal.universidade}</p>
-                      </div>
-                    </div>
+                    </Card>
                   )}
 
                   {goal.tempo_meta && (
-                    <div className="rounded-2xl border-2 border-amber-100 bg-amber-50 p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-                        <Clock className="w-5 h-5 text-amber-600" />
+                    <Card className="bg-[hsl(var(--warning-soft))] border-[hsl(var(--warning)_/_0.2)]">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-[hsl(var(--warning))] flex items-center justify-center shrink-0">
+                          <Clock className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-[hsl(38_92%_40%)] font-medium">
+                            Tempo Meta
+                          </p>
+                          <p className="font-semibold text-[hsl(var(--foreground))] text-sm">
+                            {goal.tempo_meta} meses
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs text-amber-600 font-semibold">Tempo Meta</p>
-                        <p className="font-bold text-gray-900 text-sm">{goal.tempo_meta} meses</p>
-                      </div>
-                    </div>
+                    </Card>
                   )}
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Tips */}
-            <div className="rounded-2xl border-2 border-sky-100 bg-sky-50 p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <Zap className="w-5 h-5 text-sky-600" />
-                <p className="font-bold text-sky-800">Dicas para Melhorar</p>
-              </div>
-              <ul className="space-y-1.5 text-sm text-sky-700">
-                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-sky-400 flex-shrink-0" /> Revise seu objetivo periodicamente</li>
-                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-sky-400 flex-shrink-0" /> Refaça o diagnóstico quando sentir que progrediu</li>
-                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-sky-400 flex-shrink-0" /> Acompanhe suas disciplinas regularmente</li>
-                <li className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-sky-400 flex-shrink-0" /> Use as trilhas de estudo como guia estruturado</li>
-              </ul>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card className="bg-[hsl(var(--accent-soft))] border-[hsl(var(--accent)_/_0.2)]">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-[hsl(var(--accent))] flex items-center justify-center shrink-0">
+                    <Lightbulb className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-[hsl(var(--foreground))] mb-2">
+                      Dicas para Melhorar
+                    </p>
+                    <ul className="space-y-1.5 text-sm text-[hsl(var(--muted-foreground))]">
+                      {tips.map((tip) => (
+                        <li key={tip} className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--accent))] shrink-0" />
+                          {tip}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
 
             {/* Actions */}
-            <div className="grid grid-cols-2 gap-3">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="grid grid-cols-2 gap-3"
+            >
               <Link href="/aluno/plano">
-                <Button size="lg" variant="outline" fullWidth icon={<ArrowRight className="w-4 h-4" />}>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  fullWidth
+                  icon={<ArrowRight className="w-4 h-4" />}
+                >
                   Meu Plano
                 </Button>
               </Link>
               <Link href="/aluno/dashboard">
-                <Button size="lg" variant="secondary" fullWidth icon={<LayoutDashboard className="w-4 h-4" />}>
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  fullWidth
+                  icon={<LayoutDashboard className="w-4 h-4" />}
+                >
                   Dashboard
                 </Button>
               </Link>
-            </div>
-
+            </motion.div>
           </div>
         )}
       </Container>

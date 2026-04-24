@@ -1,55 +1,55 @@
-import { ReactNode } from 'react';
+'use client';
 
-interface CardProps {
+import { forwardRef, type ReactNode, type HTMLAttributes } from 'react';
+import { motion, type HTMLMotionProps } from 'framer-motion';
+
+interface CardProps extends Omit<HTMLMotionProps<'div'>, 'children'> {
   children: ReactNode;
-  className?: string;
-  hoverable?: boolean;
-  variant?: 'default' | 'glass' | 'gradient-primary' | 'gradient-accent' | 'gradient-success' | 'gradient-warm';
+  variant?: 'default' | 'elevated' | 'outline';
   padding?: 'none' | 'sm' | 'md' | 'lg';
-  onClick?: () => void;
+  hoverable?: boolean;
 }
 
-export function Card({
-  children,
-  className = '',
-  hoverable = false,
-  variant = 'default',
-  padding = 'md',
-  onClick,
-}: CardProps) {
-  const paddingClass = {
+export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
+  {
+    children,
+    variant = 'default',
+    padding = 'md',
+    hoverable = false,
+    className = '',
+    ...props
+  },
+  ref
+) {
+  const paddingClasses = {
     none: '',
     sm: 'p-4',
-    md: 'p-6',
-    lg: 'p-8',
+    md: 'p-5',
+    lg: 'p-6',
   }[padding];
 
-  const variantClass = {
-    default: 'bg-white border border-[hsl(var(--border))] shadow-card',
-    glass: 'glass shadow-card border border-white/60',
-    'gradient-primary': 'bg-gradient-primary text-white border-0 shadow-[0_8px_32px_-4px_hsl(258_90%_60%_/0.4)]',
-    'gradient-accent': 'bg-gradient-accent text-white border-0 shadow-[0_8px_32px_-4px_hsl(199_95%_50%_/0.4)]',
-    'gradient-success': 'bg-gradient-success text-white border-0 shadow-[0_8px_32px_-4px_hsl(160_84%_39%_/0.4)]',
-    'gradient-warm': 'bg-gradient-warm text-white border-0 shadow-[0_8px_32px_-4px_hsl(32_95%_55%_/0.4)]',
+  const variantClasses = {
+    default: 'bg-white border border-[hsl(var(--border))] shadow-sm',
+    elevated: 'bg-white border border-[hsl(var(--border))] shadow-md',
+    outline: 'bg-transparent border-2 border-[hsl(var(--border))]',
   }[variant];
 
-  const hoverStyles = hoverable
-    ? 'cursor-pointer transition-all duration-300 ease-out-expo hover:shadow-card-hover hover:-translate-y-1 active:scale-[0.98]'
-    : '';
-
   return (
-    <div
-      onClick={onClick}
+    <motion.div
+      ref={ref}
+      initial={hoverable ? { y: 0 } : undefined}
+      whileHover={hoverable ? { y: -4, boxShadow: '0 12px 24px -8px rgba(0,0,0,0.12)' } : undefined}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
       className={[
         'rounded-2xl',
-        paddingClass,
-        variantClass,
-        hoverStyles,
+        paddingClasses,
+        variantClasses,
+        hoverable ? 'cursor-pointer' : '',
         className,
       ].join(' ')}
+      {...props}
     >
       {children}
-    </div>
+    </motion.div>
   );
-}
-
+});
