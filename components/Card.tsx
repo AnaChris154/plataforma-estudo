@@ -21,18 +21,21 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
   },
   ref
 ) {
-  const paddingClasses = {
+  const paddingClasses: Record<NonNullable<CardProps['padding']>, string> = {
     none: '',
     sm: 'p-4',
     md: 'p-5',
     lg: 'p-6',
-  }[padding];
+  };
 
-  const variantClasses = {
+  const variantClasses: Record<NonNullable<CardProps['variant']>, string> = {
     default: 'bg-white border border-[hsl(var(--border))] shadow-sm',
     elevated: 'bg-white border border-[hsl(var(--border))] shadow-md',
     outline: 'bg-transparent border-2 border-[hsl(var(--border))]',
-  }[variant];
+  };
+
+  const paddingClass = paddingClasses[padding];
+  const variantClass = variantClasses[variant];
 
   return (
     <motion.div
@@ -42,8 +45,8 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
       transition={{ duration: 0.2, ease: 'easeOut' }}
       className={[
         'rounded-2xl',
-        paddingClasses,
-        variantClasses,
+        paddingClass,
+        variantClass,
         hoverable ? 'cursor-pointer' : '',
         className,
       ].join(' ')}
